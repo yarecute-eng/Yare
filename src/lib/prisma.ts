@@ -1,9 +1,15 @@
 import { PrismaClient } from "@prisma/client"
+import { PrismaNeon } from "@prisma/adapter-neon"
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3"
 
 function createPrismaClient() {
   const dbUrl = process.env.DATABASE_URL ?? "file:./prisma/dev.db"
-  const adapter = new PrismaBetterSqlite3({ url: dbUrl })
+  const isPostgres = dbUrl.startsWith("postgres")
+
+  const adapter = isPostgres
+    ? new PrismaNeon({ connectionString: dbUrl })
+    : new PrismaBetterSqlite3({ url: dbUrl })
+
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
