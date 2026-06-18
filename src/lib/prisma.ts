@@ -1,15 +1,12 @@
 import { PrismaClient } from "@prisma/client"
+import { Pool } from "@neondatabase/serverless"
 import { PrismaNeon } from "@prisma/adapter-neon"
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3"
 
 function createPrismaClient() {
-  const dbUrl = process.env.DATABASE_URL ?? "file:./prisma/dev.db"
-  const isPostgres = dbUrl.startsWith("postgres")
+  const dbUrl = process.env.DATABASE_URL
+  if (!dbUrl) throw new Error("DATABASE_URL no está configurada")
 
-  const adapter = isPostgres
-    ? new PrismaNeon({ connectionString: dbUrl })
-    : new PrismaBetterSqlite3({ url: dbUrl })
-
+  const adapter = new PrismaNeon({ connectionString: dbUrl })
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
