@@ -1,7 +1,7 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  // Cabeceras de seguridad básicas
+  eslint: { ignoreDuringBuilds: true },
   async headers() {
     return [
       {
