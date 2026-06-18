@@ -1,17 +1,45 @@
 import { Metadata } from "next"
+import { auth } from "@/auth"
+import { prisma } from "@/lib/prisma"
+import { redirect } from "next/navigation"
+import CompartirClient from "./compartir-client"
 
-export const metadata: Metadata = { title: "Compartir" }
+export const metadata: Metadata = {
+  title: "Compartir y crece | Princessitas Ceremonias",
+}
 
-export default function CompartirPage() {
+export default async function CompartirPage() {
+  const session = await auth()
+  if (!session?.user) redirect("/login")
+
+  const usuario = session.user as { id: string; rol: string; nombre: string }
+  const esAdmin = usuario.rol === "ADMIN"
+
+  const [config, usuarioActual, vendedoresConSlug] = await Promise.all([
+    prisma.configuracionNegocio.findUnique({ where: { id: "singleton" } }),
+    prisma.usuario.findUnique({
+      where: { id: usuario.id },
+      select: { id: true, slugAgenda: true },
+    }),
+    esAdmin
+      ? prisma.usuario.findMany({
+          where: { slugAgenda: { not: null } },
+          select: { nombre: true, slugAgenda: true },
+          orderBy: { nombre: "asc" },
+        })
+      : Promise.resolve([]),
+  ])
+
+  const vendedores = (vendedoresConSlug as { nombre: string; slugAgenda: string | null }[])
+    .filter((v): v is { nombre: string; slugAgenda: string } => v.slugAgenda !== null)
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white capitalize">compartir</h1>
-        <p className="text-gray-500 text-sm">Cargando...</p>
-      </div>
-      <div className="rounded-xl border bg-white dark:bg-gray-900 p-8 text-center text-gray-400">
-        Sección en construcción
-      </div>
-    </div>
+    <CompartirClient
+      baseUrl="https://princessitas.mx"
+      slugAgenda={usuarioActual?.slugAgenda ?? null}
+      vendedores={vendedores}
+      negocioNombre={config?.nombre ?? "Princessitas Ceremonias"}
+      esAdmin={esAdmin}
+    />
   )
 }
