@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Circle,
 } from "lucide-react"
+import CrearUsuarioForm from "./crear-usuario-form"
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { formatFecha, formatMonto, cn } from "@/lib/utils"
@@ -243,6 +244,7 @@ export default async function AdminPage({ searchParams }: PageProps) {
               <p className="text-xs text-gray-400">
                 {usuarios.length} usuarios en total
               </p>
+              <CrearUsuarioForm />
             </div>
 
             <Card padding="md">
@@ -343,9 +345,6 @@ export default async function AdminPage({ searchParams }: PageProps) {
               </div>
             </Card>
 
-            <p className="text-center text-xs text-gray-400 py-1">
-              Gestión de usuarios próximamente
-            </p>
           </section>
         )}
 

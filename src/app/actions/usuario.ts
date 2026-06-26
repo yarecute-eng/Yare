@@ -46,6 +46,53 @@ export async function actualizarPerfil(data: z.infer<typeof PerfilSchema>) {
   return { success: true }
 }
 
+export async function crearUsuario(data: {
+  nombre: string
+  correo: string
+  contrasena: string
+  rol: "ADMIN" | "VENDEDOR"
+}) {
+  const session = await auth()
+  if (!session?.user) return { error: "No autenticado" }
+  const usuario = session.user as any
+  if (usuario.rol !== "ADMIN") return { error: "Sin permisos" }
+
+  if (!data.nombre || !data.correo || !data.contrasena) return { error: "Todos los campos son requeridos" }
+  if (data.contrasena.length < 8) return { error: "La contraseña debe tener al menos 8 caracteres" }
+
+  const existe = await prisma.usuario.findUnique({ where: { correo: data.correo } })
+  if (existe) return { error: "Ya existe un usuario con ese correo" }
+
+  const bcrypt = await import("bcryptjs")
+  const hash = await bcrypt.hash(data.contrasena, 12)
+
+  await prisma.usuario.create({
+    data: {
+      nombre: data.nombre,
+      correo: data.correo,
+      contrasenaHash: hash,
+      rol: data.rol,
+    },
+  })
+
+  revalidatePath("/admin")
+  return { success: true }
+}
+
+export async function toggleUsuarioActivo(id: string) {
+  const session = await auth()
+  if (!session?.user) return { error: "No autenticado" }
+  const usuario = session.user as any
+  if (usuario.rol !== "ADMIN") return { error: "Sin permisos" }
+
+  const user = await prisma.usuario.findUnique({ where: { id } })
+  if (!user) return { error: "Usuario no encontrado" }
+
+  await prisma.usuario.update({ where: { id }, data: { activo: !user.activo } })
+  revalidatePath("/admin")
+  return { success: true }
+}
+
 export async function cambiarContrasena(data: {
   actual: string
   nueva: string
