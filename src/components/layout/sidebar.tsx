@@ -29,7 +29,7 @@ const navItems: NavItem[] = [
   { href: "/completados", icon: Trophy, label: "Completados", color: "text-green-600" },
   { href: "/perdidos", icon: XCircle, label: "Perdidos", color: "text-gray-500" },
   { href: "/archivados", icon: Archive, label: "Archivados", color: "text-gray-400" },
-  { href: "/paginas-agenda", icon: CalendarPlus, label: "Mis ligas de citas", color: "text-teal-500" },
+  { href: "/compartir", icon: CalendarPlus, label: "Mis ligas de citas", color: "text-teal-500" },
   { href: "/compartir", icon: Share2, label: "Comparte y crece", color: "text-[#a78bdb]" },
   { href: "/equipo", icon: UserCog, label: "Equipo", color: "text-cyan-500", admin: true },
   { href: "/admin", icon: ShieldCheck, label: "Panel admin", color: "text-[#a78bdb]", admin: true },
