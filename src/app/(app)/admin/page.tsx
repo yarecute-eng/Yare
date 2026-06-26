@@ -168,8 +168,10 @@ export default async function AdminPage({ searchParams }: PageProps) {
       prisma.registroAuditoria.count(),
     ])
   } else if (tab === "configuracion") {
-    config = await prisma.configuracionNegocio.findUnique({
+    config = await prisma.configuracionNegocio.upsert({
       where: { id: "singleton" },
+      create: { id: "singleton" },
+      update: {},
     })
   }
 
