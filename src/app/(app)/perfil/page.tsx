@@ -1,17 +1,32 @@
+import { auth } from "@/auth"
+import { prisma } from "@/lib/prisma"
+import { redirect } from "next/navigation"
 import { Metadata } from "next"
+import PerfilClient from "./perfil-client"
 
 export const metadata: Metadata = { title: "Perfil" }
 
-export default function PerfilPage() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white capitalize">perfil</h1>
-        <p className="text-gray-500 text-sm">Cargando...</p>
-      </div>
-      <div className="rounded-xl border bg-white dark:bg-gray-900 p-8 text-center text-gray-400">
-        Sección en construcción
-      </div>
-    </div>
-  )
+export default async function PerfilPage() {
+  const session = await auth()
+  if (!session?.user) redirect("/login")
+  const usuario = session.user as any
+
+  const user = await prisma.usuario.findUnique({
+    where: { id: usuario.id },
+    select: {
+      id: true,
+      nombre: true,
+      correo: true,
+      rol: true,
+      slugAgenda: true,
+      metaMensual: true,
+      creadoEn: true,
+    },
+  })
+
+  if (!user) redirect("/login")
+
+  const baseUrl = process.env.NEXT_PUBLIC_URL ?? ""
+
+  return <PerfilClient user={user} baseUrl={baseUrl} />
 }
