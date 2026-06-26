@@ -35,7 +35,7 @@ export default function NuevaCitaClient({
     e.preventDefault()
     if (!form.clienteId) { showError("Selecciona un cliente"); return }
     setLoading(true)
-    const result = await agendarCita(form)
+    const result = await agendarCita({ ...form, duracion: parseInt(form.duracion) })
     setLoading(false)
     if (result.error) { showError(result.error); return }
     success("¡Cita agendada! ✓")
